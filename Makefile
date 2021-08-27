@@ -33,14 +33,15 @@ all: $(NAME)
 $(NAME): $(OBJS) $(HEADER)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
-.c.o:
-	$(CC) $(CFGLAGS) -c $< -o ${<:.c=.o}
-
 bonus: $(OBJS_B) $(HEADER_B)
 	$(CC) $(CFLAGS) $(OBJS_B) -o $(NAME)
 
+%.o : %.c
+	$(CC) $(CFLAGS) -c $< -o ${<:.c=.o}
+
 clean:
 	$(RM) $(OBJS)
+	$(RM) $(OBJS_B)
 
 x:
 	 ./pipex here_doc stop cat cat cat result.txt
