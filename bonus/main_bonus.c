@@ -106,9 +106,15 @@ int	main(int argc, char *argv[], char *envp[])
 	parser(&param_list, argv, &input, &output_file);
 	envp++;
 	if (validation(input, output_file, argc) == -1)
-		return (ft_lstclear(&param_list));
+	{
+		ft_lstclear(&param_list);
+		return (EXIT_FAILURE);
+	}
 	if (exec_manager(param_list, input, output_file, envp) == -1)
-		return (ft_lstclear(&param_list));
+	{
+		ft_lstclear(&param_list);
+		return (EXIT_FAILURE);
+	}
 	ft_lstclear(&param_list);
 	return (0);
 }
