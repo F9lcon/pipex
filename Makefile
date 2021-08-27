@@ -32,8 +32,8 @@ all: $(NAME)
 $(NAME): $(OBJS) $(HEADER)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
-%c%o:
-	${GCC} -c $< -o ${<:.c=.o}
+.c.o:
+	$(CC) $(CFGLAGS) -c $< -o ${<:.c=.o}
 
 bonus: $(OBJS_B) $(HEADER_B)
 	$(CC) $(CFLAGS) $(OBJS_B) -o $(NAME)

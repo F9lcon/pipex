@@ -16,6 +16,7 @@ void	child_exec(t_list *params, int input_fd, int last_output_fd,
 				   char **envp)
 {
 	char	**path_pointer;
+	t_list	*list_top;
 
 	params->path_arr = get_path_arr(envp);
 	if (!params->path_arr)
@@ -28,10 +29,11 @@ void	child_exec(t_list *params, int input_fd, int last_output_fd,
 		execve(*path_pointer, params->cmd_arr, envp);
 		path_pointer++;
 	}
-//	ft_lstclear(&params); some shit here no comands
-// valgrind ????
-// make object
+	list_top = params;
+	while (list_top->prev)
+		list_top = list_top->prev;
 	error_handle_program(params->cmd_arr[0]);
+	ft_lstclear(&list_top);
 	exit (EXIT_FAILURE);
 }
 
@@ -92,13 +94,22 @@ int	main(int argc, char *argv[], char *envp[])
 	char	*output_file;
 
 	param_list = NULL;
-	if (argc != 5)
-		return (error_handle_argc());
-	parser(&param_list, argv, &input_file, &output_file);
+	if (!argc || !argv)
+		return 0;
+	char *argg[] = {"pipex", "test.txt", "cat", "cat", "new.txt", 0};
+//	if (argc != 5)
+//		return (error_handle_argc());
+	parser(&param_list, argg, &input_file, &output_file);
 	if (validation(input_file, output_file) == -1)
-		return (ft_lstclear(&param_list));
+	{
+		ft_lstclear(&param_list);
+		return (EXIT_FAILURE);
+	}
 	if (exec_manager(param_list, input_file, output_file, envp) == -1)
-		return (ft_lstclear(&param_list));
+	{
+		ft_lstclear(&param_list);
+		return (EXIT_FAILURE);
+	}
 	ft_lstclear(&param_list);
 	return (0);
 }

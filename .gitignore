@@ -1,3 +1,10 @@
 *.o
 .idea/
 pipex
+.DS_Store
+MakeLists.txt
+make-build-debug/
+s_frbt.sh
+ipex.dSYM/
+res.txt
+test.txt

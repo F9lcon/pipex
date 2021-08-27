@@ -27,13 +27,13 @@ void	free_array(char **arr)
 	free(p);
 }
 
-int	ft_lstclear(t_list **lst)
+void	ft_lstclear(t_list **lst)
 {
 	t_list	*tmp;
 	t_list	*next;
 
 	if (!lst)
-		return (-1);
+		return ;
 	tmp = *lst;
 	while (tmp)
 	{
@@ -44,5 +44,4 @@ int	ft_lstclear(t_list **lst)
 		tmp = next;
 	}
 	*lst = 0;
-	return (-1);
 }

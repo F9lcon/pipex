@@ -18,6 +18,7 @@ void	child_exec(t_list *params, int input_fd, int last_output_fd,
 				   char **envp)
 {
 	char	**path_pointer;
+	t_list	*list_top;
 
 	params->path_arr = get_path_arr(envp);
 	if (!params->path_arr)
@@ -30,7 +31,11 @@ void	child_exec(t_list *params, int input_fd, int last_output_fd,
 		execve(*path_pointer, params->cmd_arr, envp);
 		path_pointer++;
 	}
+	list_top = params;
+	while (list_top->prev)
+		list_top = list_top->prev;
 	error_handle_program(params->cmd_arr[0]);
+	ft_lstclear(&list_top);
 	exit(EXIT_FAILURE);
 }
 
