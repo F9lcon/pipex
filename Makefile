@@ -36,7 +36,7 @@ $(NAME): $(OBJS) $(HEADER)
 bonus: $(OBJS_B) $(HEADER_B)
 	$(CC) $(CFLAGS) $(OBJS_B) -o $(NAME)
 
-%.o : %.c
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o ${<:.c=.o}
 
 clean:

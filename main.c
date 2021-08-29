@@ -94,12 +94,9 @@ int	main(int argc, char *argv[], char *envp[])
 	char	*output_file;
 
 	param_list = NULL;
-	if (!argc || !argv)
-		return 0;
-	char *argg[] = {"pipex", "test.txt", "cat", "cat", "new.txt", 0};
-//	if (argc != 5)
-//		return (error_handle_argc());
-	parser(&param_list, argg, &input_file, &output_file);
+	if (argc != 5)
+		return (error_handle_argc());
+	parser(&param_list, argv, &input_file, &output_file);
 	if (validation(input_file, output_file) == -1)
 	{
 		ft_lstclear(&param_list);

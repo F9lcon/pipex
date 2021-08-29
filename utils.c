@@ -26,7 +26,7 @@ void	set_child_fd(t_list *params, int input_fd, int last_output_fd)
 
 int	validation(char *input_file, char *output_file)
 {
-	if (access(input_file, 0) == -1 || access(input_file, R_OK) == -1)
+	if (access(input_file, F_OK) == -1 || access(input_file, R_OK) == -1)
 	{
 		perror(input_file);
 		return (-1);
