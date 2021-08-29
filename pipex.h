@@ -24,11 +24,9 @@ typedef struct s_list
 {
 	struct s_list	*next;
 	struct s_list	*prev;
-	int				index;
 	char			**cmd_arr;
 	char			**path_arr;
 	int				fd[2];
-	char			*limiter;
 }					t_list;
 
 char	**get_path_arr(char **envp);

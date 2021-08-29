@@ -20,10 +20,9 @@ void	child_exec(t_list *params, int input_fd, int last_output_fd,
 	char	**path_pointer;
 	t_list	*list_top;
 
-	params->path_arr = get_path_arr(envp);
+	params->path_arr = get_path_arr(envp, params->cmd_arr[0]);
 	if (!params->path_arr)
-		return ;
-	set_path_arr(params->path_arr, params->cmd_arr[0]);
+		exit(-1);
 	path_pointer = params->path_arr;
 	set_child_fd(params, input_fd, last_output_fd);
 	while (*path_pointer)
@@ -34,15 +33,13 @@ void	child_exec(t_list *params, int input_fd, int last_output_fd,
 	list_top = params;
 	while (list_top->prev)
 		list_top = list_top->prev;
-	error_handle_program(params->cmd_arr[0]);
 	ft_lstclear(&list_top);
-	exit(EXIT_FAILURE);
+	exit(-1);
 }
 
 int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 {
 	int		pid;
-	int		exit_status;
 
 	if (params->next)
 		pipe(params->fd);
@@ -51,14 +48,13 @@ int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 		child_exec(params, input_fd, last_output_fd, envp);
 	else
 	{
-		wait(&exit_status);
-		close(input_fd);
+		wait(NULL);
+		if (input_fd != -1)
+			close(input_fd);
 		if (params->limiter)
 			unlink(TMP_FILE_NAME);
 		if (params->next)
 			close(params->fd[1]);
-		if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status))
-			return (-1);
 		if (params->next)
 			return (params->fd[0]);
 	}
@@ -79,15 +75,13 @@ int	exec_manager(t_list *params, char *input_file, char *output_file,
 	else
 	{
 		input_fd = open(input_file, O_RDONLY);
+		// if input == -1
 		last_output_fd = open(output_file, O_WRONLY | O_TRUNC | O_CREAT, 0777);
 	}
-	if (input_fd == -1 || last_output_fd == -1)
-		return (-1);
+	// if output == -1
 	while (params)
 	{
 		input_fd = my_exec(params, input_fd, last_output_fd, envp);
-		if (input_fd == -1)
-			return (-1);
 		params = params->next;
 	}
 	close(last_output_fd);
@@ -100,21 +94,22 @@ int	main(int argc, char *argv[], char *envp[])
 	char	*input;
 	char	*output_file;
 
+	input = NULL;
+	output_file = NULL;
 	param_list = NULL;
 	if (argc < 5)
 		return (error_handle_argc());
 	parser(&param_list, argv, &input, &output_file);
-	envp++;
-	if (validation(input, output_file, argc) == -1)
+	if (validation(input, param_list, argc, envp) == -1)
 	{
 		ft_lstclear(&param_list);
 		return (EXIT_FAILURE);
 	}
-	if (exec_manager(param_list, input, output_file, envp) == -1)
-	{
-		ft_lstclear(&param_list);
-		return (EXIT_FAILURE);
-	}
-	ft_lstclear(&param_list);
+//	if (exec_manager(param_list, input, output_file, envp) == -1)
+//	{
+//		ft_lstclear(&param_list);
+//		return (EXIT_FAILURE);
+//	}
+//	ft_lstclear(&param_list);
 	return (0);
 }

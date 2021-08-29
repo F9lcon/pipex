@@ -31,13 +31,12 @@ typedef struct s_list
 	char			*limiter;
 }					t_list;
 
-char	**get_path_arr(char **envp);
+char	**get_path_arr(char **envp, char *app_name);
 char	*get_path(char *absolute_path, char *app_name);
 void	parser(t_list **param_list, char **argv, char **input_file,
 			   char **output_file);
 void	set_path_arr(char **current_path_arr, char *app_name);
-int		validation(char *input_file, char *output_file, int argc);
-void	free_arr(char **arr);
+int		validation(char *input_file, t_list *param_list, int argc, char **envp);
 void	set_child_fd(t_list *params, int input_fd, int last_output_fd);
 int		get_next_line(int fd, char **line);
 int		get_input_from_std(char *limiter);
@@ -56,4 +55,5 @@ void	ft_lstadd_back(t_list **lst, t_list *new);
 t_list	*ft_lstlast(t_list *lst);
 t_list	*ft_lstnew(char **cmd_arr);
 void	ft_lstclear(t_list **lst);
+void	free_array(char **arr);
 #endif

@@ -23,6 +23,5 @@ t_list	*ft_lstnew(char **cmd_arr)
 	new->cmd_arr = cmd_arr;
 	new->path_arr = NULL;
 	new->prev = 0;
-	new->limiter = NULL;
 	return (new);
 }

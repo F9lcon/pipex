@@ -31,7 +31,7 @@ int	validation(char *input_file, char *output_file)
 		perror(input_file);
 		return (-1);
 	}
-	if (!access(output_file, 0))
+	if (!access(output_file, F_OK))
 	{
 		if (access(output_file, W_OK) == -1)
 		{

@@ -34,13 +34,12 @@ void	child_exec(t_list *params, int input_fd, int last_output_fd,
 		list_top = list_top->prev;
 	error_handle_program(params->cmd_arr[0]);
 	ft_lstclear(&list_top);
-	exit (EXIT_FAILURE);
+	exit(-1);
 }
 
 int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 {
 	int		pid;
-	int		exit_status;
 
 	if (params->next)
 		pipe(params->fd);
@@ -49,12 +48,10 @@ int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 		child_exec(params, input_fd, last_output_fd, envp);
 	else
 	{
-		wait(&exit_status);
+		wait(NULL);
 		close(input_fd);
 		if (params->next)
 			close(params->fd[1]);
-		if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status))
-			return (-1);
 		if (params->next)
 			return (params->fd[0]);
 	}

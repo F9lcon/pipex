@@ -26,25 +26,31 @@ void	set_child_fd(t_list *params, int input_fd, int last_output_fd)
 	}
 }
 
-int	validation(char *input_file, char *output_file, int argc)
+int	validation(char *input_file, t_list *param_list, int argc, char **envp)
 {
-	if (!input_file && argc < 6)
-		return (error_handle_argc());
-	if (input_file)
+	t_list	*tmp;
+	char	**path;
+	char	**path_pointer;
+	int 	check_stat;
+
+	tmp = param_list;
+	if (!param_list || (!input_file && argc < 6))
+		return (-1);
+	while (tmp)
 	{
-		if (access(input_file, 0) == -1 || access(input_file, R_OK) == -1)
+		path = get_path_arr(envp, tmp->cmd_arr[0]);
+		path_pointer = path;
+		while (*path_pointer)
 		{
-			perror(input_file);
-			return (-1);
+			check_stat = access(*path_pointer, X_OK);
+			if (check_stat == 0)
+				break ;
+			path_pointer++;
 		}
-	}
-	if (!access(output_file, 0))
-	{
-		if (access(output_file, W_OK) == -1)
-		{
-			perror(output_file);
-			return (-1);
-		}
+		free_array(path);
+		if (check_stat == -1)
+			perror(tmp->cmd_arr[0]);
+		tmp = tmp->next;
 	}
 	return (0);
 }
