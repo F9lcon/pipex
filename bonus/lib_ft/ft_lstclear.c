@@ -39,7 +39,7 @@ void	ft_lstclear(t_list **lst)
 	{
 		next = tmp->next;
 		free_array(tmp->cmd_arr);
-		free_array(tmp->path_arr);
+		free(tmp->path_app);
 		free(tmp);
 		tmp = next;
 	}

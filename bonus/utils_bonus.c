@@ -14,29 +14,56 @@
 
 #define TMP_FILE_NAME ".tmp.txt"
 
+int	error_handle_program(char *app_name)
+{
+	ft_putstr_fd("command not found: ", 2);
+	ft_putstr_fd(app_name, 2);
+	ft_putstr_fd("\n", 2);
+	return (-1);
+}
+
 void	set_child_fd(t_list *params, int input_fd, int last_output_fd)
 {
-	dup2(input_fd, STDIN_FILENO);
-	if (!(params->next))
-		dup2(last_output_fd, STDOUT_FILENO);
-	else
+	if (input_fd > 0)
 	{
+		dup2(input_fd, STDIN_FILENO);
 		close(params->fd[0]);
+	}
+	else
+		dup2(params->fd[0], STDIN_FILENO);
+	if (!params->next)
+	{
+		if (last_output_fd > 0)
+		{
+			dup2(last_output_fd, STDOUT_FILENO);
+			close(params->fd[1]);
+		}
+		else
+			dup2(params->fd[1], STDOUT_FILENO);
+	}
+	else
 		dup2(params->fd[1], STDOUT_FILENO);
+}
+
+void	check_status_path(int check_status, t_list *params)
+{
+	if (check_status == -1)
+	{
+		error_handle_program(params->cmd_arr[0]);
+		free_array(params->cmd_arr);
+		params->cmd_arr = NULL;
 	}
 }
 
 int	validation(char *input_file, t_list *param_list, int argc, char **envp)
 {
-	t_list	*tmp;
 	char	**path;
 	char	**path_pointer;
 	int 	check_stat;
 
-	tmp = param_list;
 	if (!param_list || (!input_file && argc < 6))
 		return (-1);
-	while (tmp)
+	while (param_list)
 	{
 		path = get_path_arr(envp, tmp->cmd_arr[0]);
 		path_pointer = path;
@@ -44,50 +71,40 @@ int	validation(char *input_file, t_list *param_list, int argc, char **envp)
 		{
 			check_stat = access(*path_pointer, X_OK);
 			if (check_stat == 0)
+			{
+				param_list->path_app = ft_strdup(*path_pointer);
 				break ;
+			}
 			path_pointer++;
 		}
 		free_array(path);
-		if (check_stat == -1)
-			perror(tmp->cmd_arr[0]);
-		tmp = tmp->next;
+		check_status_path(check_stat, param_list);
+		param_list = param_list->next;
 	}
 	return (0);
 }
 
-int	get_input_from_std(char *limiter)
+void	get_input_from_std(char *limiter, int fd)
 {
 	char	*line;
-	int		tmp_file;
 
 	line = NULL;
-	tmp_file = open(TMP_FILE_NAME, O_WRONLY | O_CREAT | O_APPEND, 0777);
-	if (tmp_file == -1)
-		return (-1);
 	while (get_next_line(STDIN_FILENO, &line) > 0)
 	{
 		if (ft_strncmp(line, limiter, ft_strlen(limiter) + 1))
 		{
-			write(tmp_file, line, ft_strlen(line));
-			write(tmp_file, "\n", 1);
+			write(fd, line, ft_strlen(line));
+			write(fd, "\n", 1);
 		}
 		else
 			break ;
 		free(line);
 		line = NULL;
 	}
-	close(tmp_file);
 	free(line);
-	tmp_file = open(TMP_FILE_NAME, O_RDONLY, 0777);
-	return (tmp_file);
 }
 
-int	error_handle_program(char *app_name)
-{
-	ft_putstr_fd(app_name, 2);
-	ft_putstr_fd(": No such program\n", 2);
-	return (-1);
-}
+
 
 int	error_handle_argc(void)
 {

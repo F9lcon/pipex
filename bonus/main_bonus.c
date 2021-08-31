@@ -12,80 +12,77 @@
 
 #include "pipex_bonus.h"
 
-#define TMP_FILE_NAME ".tmp.txt"
-
-void	child_exec(t_list *params, int input_fd, int last_output_fd,
-				   char **envp)
-{
-	char	**path_pointer;
-	t_list	*list_top;
-
-	params->path_arr = get_path_arr(envp, params->cmd_arr[0]);
-	if (!params->path_arr)
-		exit(-1);
-	path_pointer = params->path_arr;
-	set_child_fd(params, input_fd, last_output_fd);
-	while (*path_pointer)
-	{
-		execve(*path_pointer, params->cmd_arr, envp);
-		path_pointer++;
-	}
-	list_top = params;
-	while (list_top->prev)
-		list_top = list_top->prev;
-	ft_lstclear(&list_top);
-	exit(-1);
-}
-
 int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 {
 	int		pid;
 
-	if (params->next)
-		pipe(params->fd);
+	pipe(params->fd);
+	if (params->limiter)
+		get_input_from_std(params->limiter, params->fd[1]);
 	pid = fork();
 	if (pid == 0)
-		child_exec(params, input_fd, last_output_fd, envp);
+	{
+		set_child_fd(params, input_fd, last_output_fd);
+		execve(params->path_app, params->cmd_arr, envp);
+		ft_putstr_fd("BAD SHOT HAPPEND\n", 2); //rev dont work
+	}
 	else
 	{
-		wait(NULL);
-		if (input_fd != -1)
+		waitpid(0, NULL, WNOHANG);
+		close(params->fd[1]);
+		if (input_fd > 0)
 			close(input_fd);
-		if (params->limiter)
-			unlink(TMP_FILE_NAME);
-		if (params->next)
-			close(params->fd[1]);
-		if (params->next)
-			return (params->fd[0]);
+		if (!params->next)
+		{
+			close(params->fd[0]);
+			return (0);
+		}
 	}
-	return (0);
+	return (params->fd[0]);
 }
 
-int	exec_manager(t_list *params, char *input_file, char *output_file,
+void	exec_manager(t_list *params, int input_fd,  int last_output_fd,
+					 char **envp)
+{
+	while (params)
+	{
+		if (params->cmd_arr)
+			input_fd = my_exec(params, input_fd, last_output_fd, envp);
+		else
+		{
+			if (input_fd != -1)
+			{
+				close(input_fd);
+				input_fd = -1;
+			}
+		}
+		params = params->next;
+	}
+}
+
+void	set_files_and_exec(t_list *params, char *input_file, char *output_file,
 					char **envp)
 {
 	int		input_fd;
 	int		last_output_fd;
 
 	if (params->limiter)
-	{
-		input_fd = get_input_from_std(params->limiter);
 		last_output_fd = open(output_file, O_WRONLY | O_CREAT | O_APPEND, 0777);
-	}
+	else
+		last_output_fd = open(output_file, O_WRONLY | O_TRUNC | O_CREAT, 0777);
+	if (last_output_fd == -1)
+		perror(output_file);
+	if (params->limiter)
+		input_fd = -1;
 	else
 	{
 		input_fd = open(input_file, O_RDONLY);
-		// if input == -1
-		last_output_fd = open(output_file, O_WRONLY | O_TRUNC | O_CREAT, 0777);
+		if (input_fd == -1)
+			perror(input_file);
 	}
-	// if output == -1
-	while (params)
-	{
-		input_fd = my_exec(params, input_fd, last_output_fd, envp);
-		params = params->next;
-	}
-	close(last_output_fd);
-	return (0);
+	exec_manager(params, input_fd, last_output_fd, envp);
+	if (last_output_fd != -1)
+		close(last_output_fd);
 }
 
 int	main(int argc, char *argv[], char *envp[])
@@ -105,11 +102,7 @@ int	main(int argc, char *argv[], char *envp[])
 		ft_lstclear(&param_list);
 		return (EXIT_FAILURE);
 	}
-//	if (exec_manager(param_list, input, output_file, envp) == -1)
-//	{
-//		ft_lstclear(&param_list);
-//		return (EXIT_FAILURE);
-//	}
-//	ft_lstclear(&param_list);
+	set_files_and_exec(param_list, input, output_file, envp);
+	ft_lstclear(&param_list);
 	return (0);
 }

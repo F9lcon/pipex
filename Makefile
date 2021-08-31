@@ -44,7 +44,7 @@ clean:
 	$(RM) $(OBJS_B)
 
 x:
-	 ./pipex here_doc stop cat cat cat result.txt
+	 ./pipex new.txt cat cat result.txt
 
 fclean: clean
 	$(RM) $(NAME)

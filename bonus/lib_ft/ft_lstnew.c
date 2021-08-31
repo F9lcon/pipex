@@ -21,7 +21,7 @@ t_list	*ft_lstnew(char **cmd_arr)
 		return (0);
 	new->next = 0;
 	new->cmd_arr = cmd_arr;
-	new->path_arr = NULL;
+	new->path_app = NULL;
 	new->prev = 0;
 	new->limiter = NULL;
 	return (new);

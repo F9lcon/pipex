@@ -26,7 +26,8 @@ typedef struct s_list
 	struct s_list	*prev;
 	int				index;
 	char			**cmd_arr;
-	char			**path_arr;
+//	char			**path_arr;
+	char			*path_app;
 	int				fd[2];
 	char			*limiter;
 }					t_list;
@@ -39,7 +40,7 @@ void	set_path_arr(char **current_path_arr, char *app_name);
 int		validation(char *input_file, t_list *param_list, int argc, char **envp);
 void	set_child_fd(t_list *params, int input_fd, int last_output_fd);
 int		get_next_line(int fd, char **line);
-int		get_input_from_std(char *limiter);
+void	get_input_from_std(char *limiter, int fd);
 int		error_handle_program(char *app_name);
 int		error_handle_argc(void);
 size_t	ft_strlen(const char *s);
