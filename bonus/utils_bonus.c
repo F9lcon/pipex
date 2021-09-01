@@ -65,7 +65,7 @@ int	validation(char *input_file, t_list *param_list, int argc, char **envp)
 		return (-1);
 	while (param_list)
 	{
-		path = get_path_arr(envp, tmp->cmd_arr[0]);
+		path = get_path_arr(envp, param_list->cmd_arr[0]);
 		path_pointer = path;
 		while (*path_pointer)
 		{

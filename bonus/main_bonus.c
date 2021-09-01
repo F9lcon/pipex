@@ -28,7 +28,7 @@ int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 	}
 	else
 	{
-		waitpid(0, NULL, WNOHANG);
+		waitpid(pid, NULL, WNOHANG);
 		close(params->fd[1]);
 		if (input_fd > 0)
 			close(input_fd);
