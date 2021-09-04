@@ -26,7 +26,6 @@ typedef struct s_list
 	struct s_list	*prev;
 	int				index;
 	char			**cmd_arr;
-//	char			**path_arr;
 	char			*path_app;
 	int				fd[2];
 	char			*limiter;

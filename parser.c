@@ -56,41 +56,44 @@ void	set_path_arr(char **current_path_arr, char *app_name)
 	}
 }
 
-char	**get_path_arr(char **envp)
+char	**get_path_arr(char **envp, char *app_name)
 {
 	char	**en;
+	char	**path_arr;
 
 	en = envp;
-	while (*en)
+	path_arr = NULL;
+	while (en && *en)
 	{
 		if (ft_strnstr(*en, PATH, 5))
-			return (ft_split((*en) + 5, ':'));
+		{
+			path_arr = ft_split((*en) + 5, ':');
+			break ;
+		}
 		en++;
 	}
-	return (NULL);
+	if (!path_arr)
+		return (NULL);
+	set_path_arr(path_arr, app_name);
+	return (path_arr);
 }
 
 void	parser(t_list **param_list, char **argv, char **input_file,
 			   char **output_file)
 {
-	int	i;
+	int		i;
 
 	i = 1;
+	*input_file = argv[i];
+	i++;
 	while (argv[i])
 	{
-		if (i == 1)
-		{
-			*input_file = argv[i];
-			i++;
-			continue ;
-		}
 		if (argv[i + 1] == NULL)
 		{
 			*output_file = argv[i];
 			break ;
 		}
 		ft_lstadd_back(param_list,
-			ft_lstnew(ft_split(argv[i], ' ')));
-		i++;
+			ft_lstnew(ft_split(argv[i++], ' ')));
 	}
 }

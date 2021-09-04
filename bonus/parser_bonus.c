@@ -59,7 +59,7 @@ void	set_path_arr(char **current_path_arr, char *app_name)
 char	**get_path_arr(char **envp, char *app_name)
 {
 	char	**en;
-	char 	**path_arr;
+	char	**path_arr;
 
 	en = envp;
 	path_arr = NULL;
@@ -105,4 +105,24 @@ void	parser(t_list **param_list, char **argv, char **input_file,
 	}
 	if (limiter)
 		(*param_list)->limiter = limiter;
+}
+
+void	get_input_from_std(char *limiter, int fd)
+{
+	char	*line;
+
+	line = NULL;
+	while (get_next_line(STDIN_FILENO, &line) > 0)
+	{
+		if (ft_strncmp(line, limiter, ft_strlen(limiter) + 1))
+		{
+			write(fd, line, ft_strlen(line));
+			write(fd, "\n", 1);
+		}
+		else
+			break ;
+		free(line);
+		line = NULL;
+	}
+	free(line);
 }

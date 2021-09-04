@@ -32,9 +32,9 @@ int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 	int		fds[2];
 
 	pipe(params->fd);
-	pipe(fds);
 	if (params->limiter)
 	{
+		pipe(fds);
 		get_input_from_std(params->limiter, fds[1]);
 		close(fds[1]);
 		input_fd = fds[0];
@@ -54,7 +54,7 @@ int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 	return (params->fd[0]);
 }
 
-void	exec_manager(t_list *params, int input_fd,  int last_output_fd,
+void	exec_manager(t_list *params, int input_fd, int last_output_fd,
 					 char **envp)
 {
 	while (params)

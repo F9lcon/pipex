@@ -6,11 +6,12 @@ SRCS		=	main.c parser.c utils.c lib_ft/ft_bzero.c lib_ft/ft_calloc.c lib_ft/ft_l
 OBJS		=	${SRCS:.c=.o}
 
 SRCS_B		=	bonus/main_bonus.c bonus/parser_bonus.c bonus/utils_bonus.c\
-				bonus/gnl_pipex/get_next_line_pipex.c bonus/gnl_pipex/get_next_line_utils_pipex.c\
-				bonus/lib_ft/ft_bzero.c bonus/lib_ft/ft_calloc.c bonus/lib_ft/ft_lstadd_back.c bonus/lib_ft/ft_lstclear.c\
-				bonus/lib_ft/ft_lstlast.c bonus/lib_ft/ft_lstnew.c bonus/lib_ft/ft_putchar_fd.c bonus/lib_ft/ft_putstr_fd.c\
-				bonus/lib_ft/ft_split.c bonus/lib_ft/ft_strlen.c bonus/lib_ft/ft_strncmp.c bonus/lib_ft/ft_strnstr.c\
-				bonus/lib_ft/ft_strdup.c
+				bonus/gnl_pipex/get_next_line_bonus.c bonus/gnl_pipex/get_next_line_utils_bonus.c\
+				bonus/lib_ft/ft_bzero_bonus.c bonus/lib_ft/ft_calloc_bonus.c bonus/lib_ft/ft_lstadd_back_bonus.c\
+				bonus/lib_ft/ft_lstclear_bonus.c bonus/lib_ft/ft_lstlast_bonus.c bonus/lib_ft/ft_lstnew_bonus.c\
+				bonus/lib_ft/ft_putchar_fd_bonus.c bonus/lib_ft/ft_putstr_fd_bonus.c bonus/lib_ft/ft_split_bonus.c\
+				bonus/lib_ft/ft_strlen_bonus.c bonus/lib_ft/ft_strncmp_bonus.c bonus/lib_ft/ft_strnstr_bonus.c\
+				bonus/lib_ft/ft_strdup_bonus.c
 
 OBJS_B		=	${SRCS_B:.c=.o}
 

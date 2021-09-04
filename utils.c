@@ -12,48 +12,82 @@
 
 #include "pipex.h"
 
-void	set_child_fd(t_list *params, int input_fd, int last_output_fd)
-{
-	dup2(input_fd, STDIN_FILENO);
-	if (!(params->next))
-		dup2(last_output_fd, STDOUT_FILENO);
-	else
-	{
-		close(params->fd[0]);
-		dup2(params->fd[1], STDOUT_FILENO);
-	}
-}
-
-int	validation(char *input_file, char *output_file)
-{
-	if (access(input_file, F_OK) == -1 || access(input_file, R_OK) == -1)
-	{
-		perror(input_file);
-		return (-1);
-	}
-	if (!access(output_file, F_OK))
-	{
-		if (access(output_file, W_OK) == -1)
-		{
-			perror(output_file);
-			return (-1);
-		}
-	}
-	return (0);
-}
-
 int	error_handle_program(char *app_name)
 {
+	ft_putstr_fd("command not found: ", 2);
 	ft_putstr_fd(app_name, 2);
-	ft_putstr_fd(": No such program\n", 2);
+	ft_putstr_fd("\n", 2);
 	return (-1);
+}
+
+void	set_child_fd(t_list *params, int input_fd, int last_output_fd)
+{
+	if (input_fd > 0)
+	{
+		dup2(input_fd, STDIN_FILENO);
+		close(params->fd[0]);
+	}
+	else
+		dup2(params->fd[0], STDIN_FILENO);
+	if (!params->next)
+	{
+		if (last_output_fd > 0)
+		{
+			dup2(last_output_fd, STDOUT_FILENO);
+			close(params->fd[1]);
+		}
+		else
+			dup2(params->fd[1], STDOUT_FILENO);
+	}
+	else
+		dup2(params->fd[1], STDOUT_FILENO);
+}
+
+void	check_status_path(int check_status, t_list *params, char **path)
+{
+	free_array(path);
+	if (check_status == -1)
+	{
+		error_handle_program(params->cmd_arr[0]);
+		free_array(params->cmd_arr);
+		params->cmd_arr = NULL;
+	}
+}
+
+int	validation(t_list *param_list, char **envp)
+{
+	char	**path;
+	char	**path_pointer;
+	int		check_stat;
+
+	check_stat = -1;
+	if (!param_list)
+		return (-1);
+	while (param_list)
+	{
+		path = get_path_arr(envp, param_list->cmd_arr[0]);
+		path_pointer = path;
+		while (path && *path_pointer)
+		 {
+			check_stat = access(*path_pointer, X_OK);
+			if (check_stat == 0)
+			{
+				param_list->path_app = ft_strdup(*path_pointer);
+				break ;
+			}
+			path_pointer++;
+		}
+		check_status_path(check_stat, param_list, path);
+		param_list = param_list->next;
+	}
+	return (0);
 }
 
 int	error_handle_argc(void)
 {
 	ft_putstr_fd("------------------------------\n", 2);
 	ft_putstr_fd("Need 4 args:\n", 2);
-	ft_putstr_fd("file1 cmd1 cmd2 file2\n", 2);
+	ft_putstr_fd("file1 cmd1 cmdn file2\n", 2);
 	ft_putstr_fd("------------------------------\n", 2);
 	return (-1);
 }

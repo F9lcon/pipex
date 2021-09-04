@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   main_bonus.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: namina <namina@student.21-school.ru>         +#+  +:+       +#+      */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,28 +12,17 @@
 
 #include "pipex.h"
 
-void	child_exec(t_list *params, int input_fd, int last_output_fd,
-				   char **envp)
+void	child_process(t_list *params, int input_fd, int last_output_fd,
+					   char **envp)
 {
-	char	**path_pointer;
-	t_list	*list_top;
+	t_list	*tmp;
 
-	params->path_arr = get_path_arr(envp);
-	if (!params->path_arr)
-		return ;
-	set_path_arr(params->path_arr, params->cmd_arr[0]);
-	path_pointer = params->path_arr;
+	tmp = params;
 	set_child_fd(params, input_fd, last_output_fd);
-	while (*path_pointer)
-	{
-		execve(*path_pointer, params->cmd_arr, envp);
-		path_pointer++;
-	}
-	list_top = params;
-	while (list_top->prev)
-		list_top = list_top->prev;
-	error_handle_program(params->cmd_arr[0]);
-	ft_lstclear(&list_top);
+	execve(params->path_app, params->cmd_arr, envp);
+	while (tmp->prev)
+		tmp = tmp->prev;
+	ft_lstclear(&tmp);
 	exit(-1);
 }
 
@@ -41,69 +30,76 @@ int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 {
 	int		pid;
 
-	if (params->next)
-		pipe(params->fd);
+	pipe(params->fd);
 	pid = fork();
 	if (pid == 0)
-		child_exec(params, input_fd, last_output_fd, envp);
+		child_process(params, input_fd, last_output_fd, envp);
 	else
 	{
-		wait(NULL);
-		close(input_fd);
-		if (params->next)
-			close(params->fd[1]);
-		if (params->next)
-			return (params->fd[0]);
+		waitpid(pid, NULL, WNOHANG);
+		close(params->fd[1]);
+		if (input_fd > 0)
+			close(input_fd);
+		if (!params->next)
+			close(params->fd[0]);
 	}
-	return (0);
+	return (params->fd[0]);
 }
 
-int	exec_manager(t_list *params, char *input_file, char *output_file,
+void	exec_manager(t_list *params, int input_fd, int last_output_fd,
+					 char **envp)
+{
+	while (params)
+	{
+		if (params->cmd_arr)
+			input_fd = my_exec(params, input_fd, last_output_fd, envp);
+		else
+		{
+			if (input_fd != -1)
+			{
+				close(input_fd);
+				input_fd = -1;
+			}
+		}
+		params = params->next;
+	}
+}
+
+void	set_files_and_exec(t_list *params, char *input_file, char *output_file,
 					char **envp)
 {
-	t_list	*tmp;
 	int		input_fd;
 	int		last_output_fd;
 
-	input_fd = open(input_file, O_RDONLY);
 	last_output_fd = open(output_file, O_WRONLY | O_TRUNC | O_CREAT, 0777);
-	if (input_fd == -1 || last_output_fd == -1)
-		return (-1);
-	tmp = params;
-	while (tmp)
-	{
-		input_fd = my_exec(tmp, input_fd, last_output_fd, envp);
-		if (input_fd == -1)
-		{
-			close(last_output_fd);
-			return (-1);
-		}
-		tmp = tmp->next;
-	}
-	close(last_output_fd);
-	return (0);
+	if (last_output_fd == -1)
+		perror(output_file);
+	input_fd = open(input_file, O_RDONLY);
+	if (input_fd == -1)
+		perror(input_file);
+	exec_manager(params, input_fd, last_output_fd, envp);
+	if (last_output_fd != -1)
+		close(last_output_fd);
 }
 
 int	main(int argc, char *argv[], char *envp[])
 {
 	t_list	*param_list;
-	char	*input_file;
+	char	*input;
 	char	*output_file;
 
+	input = NULL;
+	output_file = NULL;
 	param_list = NULL;
 	if (argc != 5)
 		return (error_handle_argc());
-	parser(&param_list, argv, &input_file, &output_file);
-	if (validation(input_file, output_file) == -1)
+	parser(&param_list, argv, &input, &output_file);
+	if (validation(param_list, envp) == -1)
 	{
 		ft_lstclear(&param_list);
 		return (EXIT_FAILURE);
 	}
-	if (exec_manager(param_list, input_file, output_file, envp) == -1)
-	{
-		ft_lstclear(&param_list);
-		return (EXIT_FAILURE);
-	}
+	set_files_and_exec(param_list, input, output_file, envp);
 	ft_lstclear(&param_list);
 	return (0);
 }

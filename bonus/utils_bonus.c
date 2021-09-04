@@ -12,8 +12,6 @@
 
 #include "pipex_bonus.h"
 
-#define TMP_FILE_NAME ".tmp.txt"
-
 int	error_handle_program(char *app_name)
 {
 	ft_putstr_fd("command not found: ", 2);
@@ -60,7 +58,7 @@ int	validation(char *input_file, t_list *param_list, int argc, char **envp)
 {
 	char	**path;
 	char	**path_pointer;
-	int 	check_stat;
+	int		check_stat;
 
 	check_stat = -1;
 	if (!param_list || (!input_file && argc < 6))
@@ -83,26 +81,6 @@ int	validation(char *input_file, t_list *param_list, int argc, char **envp)
 		param_list = param_list->next;
 	}
 	return (0);
-}
-
-void	get_input_from_std(char *limiter, int fd)
-{
-	char	*line;
-
-	line = NULL;
-	while (get_next_line(STDIN_FILENO, &line) > 0)
-	{
-		if (ft_strncmp(line, limiter, ft_strlen(limiter) + 1))
-		{
-			write(fd, line, ft_strlen(line));
-			write(fd, "\n", 1);
-		}
-		else
-			break ;
-		free(line);
-		line = NULL;
-	}
-	free(line);
 }
 
 int	error_handle_argc(void)
