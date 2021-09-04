@@ -45,8 +45,9 @@ void	set_child_fd(t_list *params, int input_fd, int last_output_fd)
 		dup2(params->fd[1], STDOUT_FILENO);
 }
 
-void	check_status_path(int check_status, t_list *params)
+void	check_status_path(int check_status, t_list *params, char **path)
 {
+	free_array(path);
 	if (check_status == -1)
 	{
 		error_handle_program(params->cmd_arr[0]);
@@ -61,13 +62,14 @@ int	validation(char *input_file, t_list *param_list, int argc, char **envp)
 	char	**path_pointer;
 	int 	check_stat;
 
+	check_stat = -1;
 	if (!param_list || (!input_file && argc < 6))
 		return (-1);
 	while (param_list)
 	{
 		path = get_path_arr(envp, param_list->cmd_arr[0]);
 		path_pointer = path;
-		while (*path_pointer)
+		while (path && *path_pointer)
 		{
 			check_stat = access(*path_pointer, X_OK);
 			if (check_stat == 0)
@@ -77,8 +79,7 @@ int	validation(char *input_file, t_list *param_list, int argc, char **envp)
 			}
 			path_pointer++;
 		}
-		free_array(path);
-		check_status_path(check_stat, param_list);
+		check_status_path(check_stat, param_list, path);
 		param_list = param_list->next;
 	}
 	return (0);
@@ -103,8 +104,6 @@ void	get_input_from_std(char *limiter, int fd)
 	}
 	free(line);
 }
-
-
 
 int	error_handle_argc(void)
 {

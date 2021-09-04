@@ -12,20 +12,36 @@
 
 #include "pipex_bonus.h"
 
+void	child_process(t_list *params, int input_fd, int last_output_fd,
+					   char **envp)
+{
+	t_list	*tmp;
+
+	tmp = params;
+	set_child_fd(params, input_fd, last_output_fd);
+	execve(params->path_app, params->cmd_arr, envp);
+	while (tmp->prev)
+		tmp = tmp->prev;
+	ft_lstclear(&tmp);
+	exit(-1);
+}
+
 int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 {
 	int		pid;
+	int		fds[2];
 
 	pipe(params->fd);
+	pipe(fds);
 	if (params->limiter)
-		get_input_from_std(params->limiter, params->fd[1]);
+	{
+		get_input_from_std(params->limiter, fds[1]);
+		close(fds[1]);
+		input_fd = fds[0];
+	}
 	pid = fork();
 	if (pid == 0)
-	{
-		set_child_fd(params, input_fd, last_output_fd);
-		execve(params->path_app, params->cmd_arr, envp);
-		ft_putstr_fd("BAD SHOT HAPPEND\n", 2); //rev dont work
-	}
+		child_process(params, input_fd, last_output_fd, envp);
 	else
 	{
 		waitpid(pid, NULL, WNOHANG);
@@ -33,10 +49,7 @@ int	my_exec(t_list *params, int input_fd, int last_output_fd, char **envp)
 		if (input_fd > 0)
 			close(input_fd);
 		if (!params->next)
-		{
 			close(params->fd[0]);
-			return (0);
-		}
 	}
 	return (params->fd[0]);
 }

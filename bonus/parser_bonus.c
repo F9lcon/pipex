@@ -63,7 +63,7 @@ char	**get_path_arr(char **envp, char *app_name)
 
 	en = envp;
 	path_arr = NULL;
-	while (*en)
+	while (en && *en)
 	{
 		if (ft_strnstr(*en, PATH, 5))
 		{
@@ -73,7 +73,7 @@ char	**get_path_arr(char **envp, char *app_name)
 		en++;
 	}
 	if (!path_arr)
-		exit(-1);
+		return (NULL);
 	set_path_arr(path_arr, app_name);
 	return (path_arr);
 }
